@@ -98,6 +98,9 @@ board_t board_generate(int size, const char *pattern)
 {
     board_t board = board_construct(size, size);
 
+    for (int i = 0; pattern[i] != '\0'; i++)
+        if (pattern[i] != '.' && pattern[i] != 'o')
+            return NULL;
     for (int i = 0; i < (size * size) / (int) my_strlen(pattern); i++)
         my_memcpy(board->cells + i * my_strlen(pattern), pattern,
             my_strlen(pattern));
@@ -136,6 +139,14 @@ static int guess_size(int *width, int *height, char **line, char *buffer)
     return 0;
 }
 
+int is_line_valid(char *line, int width)
+{
+    for (int i = 0; i < width; i++)
+        if (line[i] != '.' && line[i] != 'o')
+            return 0;
+    return 1;
+}
+
 board_t board_load_from_file(const char *filename)
 {
     int fd = open(filename, O_RDONLY | O_CLOEXEC);
@@ -153,8 +164,17 @@ board_t board_load_from_file(const char *filename)
         return NULL;
     guess_size(&width, &height, &line, buffer);
     board = board_construct(width, height);
-    for (int i = 0; i < height; i++)
-        my_memcpy(board->cells + i * width, line + i * (width + 1), width);
+    for (int i = 0; i < height; i++) {
+        if (line[i * (width + 1) + width] != '\n')
+            return NULL;
+        if ((i + 1) * width + (line - buffer) > (long) get_file_size(filename))
+            return NULL;
+        if (is_line_valid(line + i * (width + 1), width))
+            my_memcpy(
+                board->cells + i * width, line + i * (width + 1), width - 1);
+        else
+            return NULL;
+    }
     my_free(buffer);
     return board;
 }

@@ -34,7 +34,9 @@ build:
 	$(MAKE) fclean
 	CFLAGS="-fprofile-generate" LDFLAGS="-fprofile-generate" $(MAKE) $(NAME)
 	ls example_files/maps/ | xargs -I {} ./$(NAME) example_files/maps/{} > /dev/null
+	ls example_files/faulty/ | xargs -I {} sh -c './$(NAME) example_files/faulty/{} > /dev/null || true'
 	./$(NAME) 10000 ".....ooooo.o.o.oooo.o.o.oooo.o.oooo....." > /dev/null
+	./$(NAME) 5 "azer" >/dev/null || true
 	$(MAKE) profclean
 	CFLAGS="-fprofile-use" LDFLAGS="-fprofile-use" $(MAKE) $(NAME)
 
