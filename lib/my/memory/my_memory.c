@@ -7,6 +7,14 @@
 
 #include <my_memory.h>
 #include <my.h>
+#include <unistd.h>
+
+static void my_putnbr(int fd, size_t nb)
+{
+    if (nb >= 10)
+        my_putnbr(fd, nb / 10);
+    write(fd, &"0123456789"[nb % 10], 1);
+}
 
 void *my_memcpy(void *dest, const void *src, size_t num)
 {
@@ -19,8 +27,12 @@ void *my_malloc(size_t size)
 {
     void *ptr = malloc(size + sizeof(size_t));
 
-    if (!ptr)
+    if (!ptr) {
+        write(STDERR_FILENO, "Unable to allocate ", 19);
+        my_putnbr(STDERR_FILENO, size);
+        write(STDERR_FILENO, " bytes\n", 7);
         __builtin_trap();
+    }
     *((size_t *) ptr) = size;
     return (char *) ptr + sizeof(size_t);
 }

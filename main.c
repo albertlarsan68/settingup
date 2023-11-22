@@ -6,6 +6,7 @@
 */
 
 #include "board.h"
+#include "my_memory.h"
 #include <my.h>
 #include <stdlib.h>
 
@@ -19,7 +20,7 @@ int main(int argc, char **argv)
     }
     if (argc == 3) {
         size = my_atoi(argv[1]);
-        if (size > 1)
+        if (size > 0 && my_strlen(argv[2]) > 0)
             board = board_generate(size, argv[2]);
     }
     if (board == NULL)

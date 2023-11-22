@@ -11,6 +11,18 @@ void board_destroy(board_t board)
     my_free(board);
 }
 
+/**
+ * @brief Check if a square of a given size can fit in the board at the given
+ * position.
+ *
+ * Complexity: O(square_size²)
+ *
+ * @param board The board to check.
+ * @param square_size The size of the square to check.
+ * @param x The x position of the square.
+ * @param y The y position of the square.
+ * @return int 1 if the square can fit, 0 otherwise.
+ */
 static int does_square_fit(
     board_t board, size_t square_size, size_t x, size_t y)
 {
@@ -23,6 +35,18 @@ static int does_square_fit(
     return 1;
 }
 
+/**
+ * @brief Check if the right and bottom sides of a square of a given size can
+ * fit in the board at the given position.
+ *
+ * Complexity: O(2 * square_size)
+ *
+ * @param board The board to check.
+ * @param square_size The size of the square to check.
+ * @param x The x position of the square.
+ * @param y The y position of the square.
+ * @return int 1 if the square can fit, 0 otherwise.
+ */
 static int does_square_fit_rim(
     board_t board, size_t square_size, size_t x, size_t y)
 {
@@ -35,6 +59,16 @@ static int does_square_fit_rim(
     return 1;
 }
 
+/**
+ * @brief Fill a square of a given size in the board at the given position.
+ *
+ * Complexity: O(square_size²)
+ *
+ * @param board The board to fill.
+ * @param square_size The size of the square to fill.
+ * @param x The x position of the square.
+ * @param y The y position of the square.
+ */
 static void fill_square(board_t board, size_t square_size, size_t x, size_t y)
 {
     for (size_t i = 0; i < square_size; i++)
@@ -42,6 +76,19 @@ static void fill_square(board_t board, size_t square_size, size_t x, size_t y)
             board->cells[(y + i) * board->width + x + j] = 'x';
 }
 
+/**
+ * @brief Find the biggest square that can fit in the board at the given
+ * position.
+ *
+ * Complexity: O(square_size²)
+ *
+ * @param board The board to check.
+ * @param square_size The size of the square to check, will be updated to the
+ * size of the biggest square that can fit.
+ * @param x The x position of the square.
+ * @param y The y position of the square.
+ * @return int 1 if the square can fit, 0 otherwise.
+ */
 int find_biggest_square_at(
     board_t board, size_t *square_size, size_t x, size_t y)
 {
@@ -57,11 +104,22 @@ int find_biggest_square_at(
     return ret;
 }
 
+/**
+ * @brief Find the biggest square that can fit in the board.
+ *
+ * Complexity: O(board->width * board->height * square_size²)
+ *
+ * @param board The board to check.
+ * @param square_size The size of the square to check, will be updated to the
+ * size of the biggest square that can fit.
+ * @param x The x position of the square.
+ * @param y The y position of the square.
+ */
 void find_biggest_square(
     board_t board, size_t *square_size, size_t *x, size_t *y)
 {
-    for (size_t i = 0; i < board->height; i++)
-        for (size_t j = 0; j < board->width; j++) {
+    for (size_t i = *x; i < board->height - *square_size; i++)
+        for (size_t j = *y; j < board->width - *square_size; j++) {
             if (find_biggest_square_at(board, square_size, j, i)) {
                 *x = j + 1;
                 *y = i + 1;
@@ -69,6 +127,13 @@ void find_biggest_square(
         }
 }
 
+/**
+ * @brief Resolve the board by filling the biggest square with 'x'.
+ *
+ * Complexity: O(board->width * board->height * square_size²)
+ *
+ * @param board The board to resolve.
+ */
 void board_resolve(board_t board)
 {
     size_t square_size = 0;
@@ -79,6 +144,13 @@ void board_resolve(board_t board)
     fill_square(board, square_size, x - 1, y - 1);
 }
 
+/**
+ * @brief Display the board on the standard output.
+ *
+ * Syscall complexity: O((2 * board->height)(write))
+ *
+ * @param board The board to display.
+ */
 void board_display(const board_t board)
 {
     for (size_t i = 0; i < board->height; i++) {
@@ -87,6 +159,15 @@ void board_display(const board_t board)
     }
 }
 
+/**
+ * @brief Construct a board of a given size.
+ *
+ * Syscall complexity: O(2(malloc))
+ *
+ * @param width The width of the board.
+ * @param height The height of the board.
+ * @return board_t The constructed board.
+ */
 static board_t board_construct(size_t width, size_t height)
 {
     board_t board = my_malloc(sizeof(*board));
@@ -94,10 +175,18 @@ static board_t board_construct(size_t width, size_t height)
     board->width = width;
     board->height = height;
     board->cells = my_calloc(sizeof(char), width * height);
-    my_memset(board->cells, ' ', width * height);
     return board;
 }
 
+/**
+ * @brief Generate a board of a given size with a given pattern.
+ *
+ * Complexity: O(size² / my_strlen(pattern))
+ *
+ * @param size The size of the board.
+ * @param pattern The pattern to fill the board with.
+ * @return board_t The generated board.
+ */
 board_t board_generate(size_t size, const char *pattern)
 {
     board_t board = board_construct(size, size);
@@ -115,6 +204,16 @@ board_t board_generate(size_t size, const char *pattern)
     return board;
 }
 
+/**
+ * @brief Get the size of a file.
+ *
+ * Complexity: O(1)
+ *
+ * Syscall complexity: O(1(stat))
+ *
+ * @param filename The name of the file.
+ * @return size_t The size of the file.
+ */
 static size_t get_file_size(const char *filename)
 {
     struct stat st;
@@ -124,6 +223,14 @@ static size_t get_file_size(const char *filename)
     return st.st_size;
 }
 
+/**
+ * @brief Guess the size of the board from the first two lines of the file.
+ *
+ * Complexity: O(width)
+ *
+ * @param str The string to convert.
+ * @return int The converted integer.
+ */
 static int guess_size(
     ssize_t *width, size_t *height, char **line, char *buffer)
 {
@@ -143,6 +250,14 @@ static int guess_size(
     return 0;
 }
 
+/**
+ * @brief Check if a line is valid.
+ *
+ * Complexity: O(width)
+ *
+ * @param filename The name of the file.
+ * @return board_t The loaded board.
+ */
 int is_line_valid(char *line, size_t width)
 {
     for (size_t i = 0; i < width; i++)
@@ -151,6 +266,14 @@ int is_line_valid(char *line, size_t width)
     return 1;
 }
 
+/**
+ * @brief Load a board from a file.
+ *
+ * Complexity: O(file_size)
+ *
+ * @param filename The name of the file.
+ * @return board_t The loaded board.
+ */
 board_t board_load_from_file(const char *filename)
 {
     int fd = open(filename, O_RDONLY | O_CLOEXEC);
