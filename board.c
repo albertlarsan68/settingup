@@ -174,8 +174,7 @@ board_t board_load_from_file(const char *filename)
         if ((i + 1) * width + (line - buffer) > get_file_size(filename))
             return NULL;
         if (is_line_valid(line + i * (width + 1), width))
-            my_memcpy(
-                board->cells + i * width, line + i * (width + 1), width - 1);
+            my_memcpy(board->cells + i * width, line + i * (width + 1), width);
         else
             return NULL;
     }
