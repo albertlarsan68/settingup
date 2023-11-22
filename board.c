@@ -283,6 +283,8 @@ board_t board_load_from_file(const char *filename)
     size_t height = 0;
     ssize_t width = 0;
 
+    if (get_file_size(filename) == 0)
+        return NULL;
     buffer = my_malloc(get_file_size(filename));
     if (fd == -1)
         return NULL;
@@ -290,6 +292,8 @@ board_t board_load_from_file(const char *filename)
     if (width == -1)
         return NULL;
     guess_size(&width, &height, &line, buffer);
+    if (width <= 0 || height <= 0)
+        return NULL;
     board = board_construct(width, height);
     for (size_t i = 0; i < height; i++) {
         if (line[i * (width + 1) + width] != '\n')
