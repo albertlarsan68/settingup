@@ -33,12 +33,10 @@ all: build
 build:
 	$(MAKE) fclean
 	CFLAGS="-fprofile-generate" LDFLAGS="-fprofile-generate" $(MAKE) $(NAME)
-	ls example_files/maps/ | xargs -I {} ./$(NAME) example_files/maps/{} > /dev/null
-	ls example_files/faulty/ | xargs -I {} sh -c './$(NAME) example_files/faulty/{} > /dev/null || true'
-	./$(NAME) 10000 ".....ooooo.o.o.oooo.o.o.oooo.o.oooo....." > /dev/null
-	./$(NAME) 5 "azer" >/dev/null || true
+	tests/e2etests.sh
 	$(MAKE) profclean
 	CFLAGS="-fprofile-use" LDFLAGS="-fprofile-use" $(MAKE) $(NAME)
+	find -type f -name "*.gc*" -delete
 
 .PHONY: clean fclean re all build tests_run libbuild
 
@@ -46,7 +44,7 @@ $(NAME): $(OBJS) lib/libmy.a
 	$(CC) $(LDFLAGS) $(OBJS) -o $@ $(LOADLIBES) $(LDLIBS)
 
 tests_run: unit_tests
-	./unit_tests
+	tests/e2etests.sh
 
 lib/libmy.a: lib/my/libmy.a
 	$(AR) $(ARFLAGS) --thin $@ $^
@@ -58,10 +56,10 @@ libbuild:
 	$(MAKE) -C lib/my
 
 unit_tests: CFLAGS += --coverage
-unit_tests: CPPFLAGS += -DUNIT_TESTS -D "static=" -D "main=my_main"
+#unit_tests: CPPFLAGS += -DUNIT_TESTS -D "static=" -D "main=my_main"
+unit_tests: LDFLAGS += --coverage
 unit_tests: fclean .WAIT $(TESTS_OBJS) $(OBJS) lib/libmy.a
-	$(CC) $(LDFLAGS) $(OBJS) $(TESTS_OBJS) --coverage \
-	-o unit_tests $(LOADLIBES) $(LDLIBS) -lcriterion
+	$(MAKE) $(NAME)
 
 %.d: %.c
 	@set -e; rm -f $@; \

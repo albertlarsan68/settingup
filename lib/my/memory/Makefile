@@ -5,7 +5,7 @@
 ## Builds stuff
 ##
 
-SRCS = my_memory.c my_memory2.c my_memory3.c my_vector.c my_vector2.c
+SRCS = my_memory.c
 
 OBJS = $(SRCS:.c=.o)
 

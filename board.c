@@ -118,8 +118,8 @@ int find_biggest_square_at(
 void find_biggest_square(
     board_t board, size_t *square_size, size_t *x, size_t *y)
 {
-    for (size_t i = *x; i < board->height - *square_size; i++)
-        for (size_t j = *y; j < board->width - *square_size; j++) {
+    for (size_t i = 0; i < board->height - *square_size; i++)
+        for (size_t j = 0; j < board->width - *square_size; j++) {
             if (find_biggest_square_at(board, square_size, j, i)) {
                 *x = j + 1;
                 *y = i + 1;
@@ -258,7 +258,7 @@ static int guess_size(
  * @param filename The name of the file.
  * @return board_t The loaded board.
  */
-int is_line_valid(char *line, size_t width)
+static int is_line_valid(char *line, size_t width)
 {
     for (size_t i = 0; i < width; i++)
         if (line[i] != '.' && line[i] != 'o')
@@ -292,7 +292,9 @@ board_t board_load_from_file(const char *filename)
     if (width == -1)
         return NULL;
     guess_size(&width, &height, &line, buffer);
-    if (width <= 0 || height <= 0)
+    if (width <= 0 || height <= 0
+        || width * height * sizeof(char) + (line - buffer) * sizeof(char)
+            > get_file_size(filename))
         return NULL;
     board = board_construct(width, height);
     for (size_t i = 0; i < height; i++) {

@@ -19,11 +19,6 @@ void *my_memset(void *s, int c, size_t n)
     return s;
 }
 
-int my_isupper(int c)
-{
-    return (c >= 'A' && c <= 'Z');
-}
-
 int my_atoi(const char *str)
 {
     int i = 0;

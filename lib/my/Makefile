@@ -5,7 +5,7 @@
 ## Builds stuff
 ##
 
-LIBS = printf memory
+LIBS = memory
 
 LIBSOBJS = $(foreach lib,$(LIBS),$(lib)/lib$(lib).a)
 
